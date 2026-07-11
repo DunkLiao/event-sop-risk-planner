@@ -20,6 +20,9 @@ files:
 win:
   target:
     - nsis
+    - portable
+portable:
+  artifactName: ${productName}-免安裝-${version}.exe
 mac:
   target:
     - dmg

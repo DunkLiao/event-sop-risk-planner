@@ -12,7 +12,8 @@
 - `npm run lint`：執行 ESLint，且不允許警告通過。
 - `npm test`：執行 SQLite 儲存層測試。
 - `npm run test:ai`：編譯並執行 AI 服務與提示詞測試。
-- `npm run build`：完成 TypeScript、Vite 與 electron-builder 正式建置。
+- `npm run build`：完成 TypeScript、Vite 與 electron-builder 正式建置（同時產出 NSIS 安裝版與 portable 免安裝版）。
+- `npm run build:portable`：僅建置 Windows 免安裝 portable 版本。portable 版透過 `process.env.PORTABLE_EXECUTABLE_DIR` 偵測便攜模式，並將 `userData` 重定向至 exe 同層 `data/` 資料夾；API Key 仍以 safeStorage（DPAPI）加密，跨機器需重新輸入。
 
 ## 程式風格與命名規範
 

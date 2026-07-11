@@ -1,4 +1,5 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import fs from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { registerSettingsHandlers } from './ipc/settings';
@@ -9,6 +10,29 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow: BrowserWindow | null = null;
+
+const configurePortableUserData = (): boolean => {
+  const portableDir = process.env.PORTABLE_EXECUTABLE_DIR;
+  if (!portableDir) return true;
+
+  const dataDir = path.join(portableDir, 'data');
+
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    app.setPath('userData', dataDir);
+    return true;
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? `無法建立便攜資料目錄：${dataDir}\n${error.message}\n請將程式置於可寫入的資料夾後再執行。`
+        : `無法建立便攜資料目錄：${dataDir}`;
+    dialog.showErrorBox('便攜模式啟動失敗', message);
+    app.quit();
+    return false;
+  }
+};
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -38,6 +62,7 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
+  if (!configurePortableUserData()) return;
   registerStorageHandlers();
   registerSettingsHandlers();
   registerGenerationHandlers();
