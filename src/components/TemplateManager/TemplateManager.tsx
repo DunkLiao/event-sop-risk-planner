@@ -32,6 +32,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { MouseEvent } from 'react';
 import { storageService } from '../../services/storage/storageService';
 import type { Project, Template, TemplateFilter } from '../../types/settings';
 import { EVENT_TYPE_OPTIONS } from '../../utils/constants';
@@ -49,6 +50,10 @@ interface TemplateManagerProps {
 }
 
 type TemplateSortValue = keyof typeof TEMPLATE_SORT_LABELS;
+
+const releaseTriggerFocus = (event: MouseEvent<HTMLElement>) => {
+  event.currentTarget.blur();
+};
 
 function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -132,7 +137,9 @@ function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
     }
   };
 
-  const handleImportTemplate = async () => {
+  const handleImportTemplate = async (event?: MouseEvent<HTMLElement>) => {
+    event?.currentTarget.blur();
+
     try {
       setError(null);
       const dialogResult = await storageService.showOpenDialog({
@@ -156,7 +163,8 @@ function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
     }
   };
 
-  const handleOpenUseDialog = (template: Template) => {
+  const handleOpenUseDialog = (template: Template, event?: MouseEvent<HTMLElement>) => {
+    event?.currentTarget.blur();
     setUseDialogTemplate(template);
     setProjectName(`${template.name} 專案`);
     setError(null);
@@ -180,7 +188,8 @@ function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
     }
   };
 
-  const handleGenerateShareCode = async (template: Template) => {
+  const handleGenerateShareCode = async (template: Template, event?: MouseEvent<HTMLElement>) => {
+    event?.currentTarget.blur();
     setShareTemplate(template);
     setShareCode(await storageService.generateTemplateShareCode(template.id));
   };
@@ -213,13 +222,14 @@ function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
               <Typography color="text.secondary">集中管理 SOP、風險評估與完整專案範本。</Typography>
             </Box>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-              <Button startIcon={<FileUploadRoundedIcon />} variant="outlined" onClick={() => void handleImportTemplate()}>
+              <Button startIcon={<FileUploadRoundedIcon />} variant="outlined" onClick={event => void handleImportTemplate(event)}>
                 匯入範本
               </Button>
               <Button
                 startIcon={<AddRoundedIcon />}
                 variant="contained"
-                onClick={() => {
+                onClick={event => {
+                  releaseTriggerFocus(event);
                   setEditorTemplate(null);
                   setEditorOpen(true);
                 }}
@@ -356,13 +366,14 @@ function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
                   <TableCell align="right">
                     <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
                       <Tooltip title="使用範本">
-                        <IconButton color="primary" onClick={() => handleOpenUseDialog(template)}>
+                        <IconButton color="primary" onClick={event => handleOpenUseDialog(template, event)}>
                           <PlayCircleRoundedIcon />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="編輯範本">
                         <IconButton
-                          onClick={() => {
+                          onClick={event => {
+                            releaseTriggerFocus(event);
                             setEditorTemplate(template);
                             setEditorOpen(true);
                           }}
@@ -376,7 +387,7 @@ function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="生成分享碼">
-                        <IconButton onClick={() => void handleGenerateShareCode(template)}>
+                        <IconButton onClick={event => void handleGenerateShareCode(template, event)}>
                           <ShareRoundedIcon />
                         </IconButton>
                       </Tooltip>

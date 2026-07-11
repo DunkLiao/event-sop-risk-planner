@@ -69,6 +69,12 @@ const theme = createTheme({
 type AppView = 'editor' | 'results' | 'projects' | 'templates';
 type SortSelection = 'updatedAt:desc' | 'name:asc' | 'status:asc';
 
+const releaseActiveElementFocus = () => {
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+};
+
 function App() {
   const [currentView, setCurrentView] = useState<AppView>('editor');
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -208,7 +214,15 @@ function App() {
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <AppBar position="static">
           <Toolbar>
-            <Button color="inherit" startIcon={<MenuRoundedIcon />} onClick={() => setDrawerOpen(true)} sx={{ mr: 2 }}>
+            <Button
+              color="inherit"
+              startIcon={<MenuRoundedIcon />}
+              onClick={() => {
+                releaseActiveElementFocus();
+                setDrawerOpen(true);
+              }}
+              sx={{ mr: 2 }}
+            >
               導航
             </Button>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -237,7 +251,10 @@ function App() {
             <Button
               color="inherit"
               startIcon={<SettingsRoundedIcon />}
-              onClick={() => setSettingsOpen(true)}
+              onClick={() => {
+                releaseActiveElementFocus();
+                setSettingsOpen(true);
+              }}
             >
               設定
             </Button>
@@ -396,17 +413,35 @@ function App() {
                   onStatusFilterChange={setStatusFilter}
                   onSortChange={value => setSortValue(value as SortSelection)}
                   onSelectProject={setSelectedProjectId}
-                  onRequestLoad={setLoadDialogProject}
-                  onRequestDuplicate={setDuplicateDialogProject}
-                  onRequestDelete={setDeleteDialogProject}
+                  onRequestLoad={project => {
+                    releaseActiveElementFocus();
+                    setLoadDialogProject(project);
+                  }}
+                  onRequestDuplicate={project => {
+                    releaseActiveElementFocus();
+                    setDuplicateDialogProject(project);
+                  }}
+                  onRequestDelete={project => {
+                    releaseActiveElementFocus();
+                    setDeleteDialogProject(project);
+                  }}
                 />
                 <ProjectDetail
                   project={selectedProject}
-                  onEdit={project => setLoadDialogProject(project)}
+                  onEdit={project => {
+                    releaseActiveElementFocus();
+                    setLoadDialogProject(project);
+                  }}
                   onExport={project => void handleProjectExport(project)}
-                  onDelete={project => setDeleteDialogProject(project)}
+                  onDelete={project => {
+                    releaseActiveElementFocus();
+                    setDeleteDialogProject(project);
+                  }}
                   onStatusChange={(project, status) => void updateProjectStatus(project.id, status)}
-                  onSaveAsTemplate={project => setTemplateDialogProject(project)}
+                  onSaveAsTemplate={project => {
+                    releaseActiveElementFocus();
+                    setTemplateDialogProject(project);
+                  }}
                 />
               </Box>
             ) : currentView === 'templates' ? (
@@ -414,7 +449,13 @@ function App() {
             ) : currentView === 'results' ? (
               <ResultWorkspace onBackToForm={() => setCurrentView('editor')} />
             ) : (
-              <EventForm onOpenTemplatePicker={() => setTemplatePickerOpen(true)} onSubmitted={() => setCurrentView('results')} />
+              <EventForm
+                onOpenTemplatePicker={() => {
+                  releaseActiveElementFocus();
+                  setTemplatePickerOpen(true);
+                }}
+                onSubmitted={() => setCurrentView('results')}
+              />
             )}
           </Box>
         </Container>

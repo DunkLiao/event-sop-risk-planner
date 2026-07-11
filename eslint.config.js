@@ -22,7 +22,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['electron/**/*.ts', 'vite.config.ts', 'tests/**/*.ts'],
+    files: ['electron/**/*.ts', 'vite.config.ts', 'tests/**/*.ts', 'scripts/**/*.mjs'],
     languageOptions: { globals: { ...globals.node, ...globals.es2021 } },
     rules: { '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
   }

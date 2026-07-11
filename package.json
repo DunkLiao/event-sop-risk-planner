@@ -17,7 +17,7 @@
     "test:ui": "vitest run",
     "electron:dev": "npm run dev",
     "electron:build": "npm run build",
-    "rebuild:native": "electron-rebuild -f -w better-sqlite3",
+    "rebuild:native": "node scripts/rebuild-native.mjs",
     "rebuild:node": "npm rebuild better-sqlite3"
   },
   "keywords": [
