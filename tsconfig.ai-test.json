@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".ai-test-dist",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "isolatedModules": false,
+    "declaration": false,
+    "sourceMap": false,
+    "allowImportingTsExtensions": false
+  },
+  "include": [
+    "src/services/ai/**/*.ts",
+    "src/store/settingsStore.ts",
+    "src/types/ai.ts",
+    "src/types/settings.ts",
+    "src/types/event.ts",
+    "src/types/risk.ts",
+    "src/utils/validators.ts",
+    "tests/ai/**/*.ts"
+  ]
+}

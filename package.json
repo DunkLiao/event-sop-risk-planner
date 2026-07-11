@@ -1,0 +1,62 @@
+{
+  "name": "event-sop-risk-planner",
+  "version": "1.0.0",
+  "description": "活動 SOP 與風險規劃生成器 - 基於 AI 的活動標準作業流程與風險評估工具",
+  "main": "dist-electron/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && electron-builder",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "test": "node --test --experimental-strip-types tests/storage/database.test.ts",
+    "type-check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "test:ai": "tsc -p tsconfig.ai-test.json && node --test .ai-test-dist/src/services/ai/__tests__/aiService.test.js .ai-test-dist/tests/ai/prompts.test.js",
+    "electron:dev": "vite",
+    "electron:build": "tsc && vite build && electron-builder"
+  },
+  "keywords": [
+    "electron",
+    "react",
+    "typescript",
+    "sop",
+    "risk-assessment",
+    "ai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.2.0",
+    "@mui/material": "^9.2.0",
+    "better-sqlite3": "^12.11.1",
+    "docx": "^9.7.1",
+    "electron-store": "^11.0.2",
+    "exceljs": "^4.4.0",
+    "openai": "^6.46.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.63.0",
+    "@typescript-eslint/parser": "^8.63.0",
+    "@vitejs/plugin-react": "^6.0.3",
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3",
+    "eslint": "^10.6.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier": "^3.9.5",
+    "typescript": "~5.6.0",
+    "vite": "^8.1.4",
+    "vite-plugin-electron": "^1.1.0"
+  }
+}
