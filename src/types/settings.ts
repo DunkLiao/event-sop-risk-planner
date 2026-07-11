@@ -1,10 +1,8 @@
-export type AIProvider = 'openai' | 'claude';
+export type AIProvider = 'openai' | 'claude' | 'openrouter';
 
 export interface ProviderSettings {
   apiKey: string;
   model: string;
-  temperature: number;
-  maxTokens: number;
 }
 
 import type { EventInfo, SOPDocument } from './event.js';
@@ -20,6 +18,7 @@ export interface AISettings {
   defaultProvider: AIProvider;
   openai: ProviderSettings;
   claude: ProviderSettings;
+  openrouter: ProviderSettings;
 }
 
 export interface DocumentSettings {

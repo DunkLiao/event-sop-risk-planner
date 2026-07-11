@@ -1,4 +1,4 @@
-export type AIProviderName = 'openai' | 'claude';
+export type AIProviderName = 'openai' | 'claude' | 'openrouter';
 export type AILocale = 'zh-TW' | 'zh-CN' | 'en';
 
 export interface AIProvider {

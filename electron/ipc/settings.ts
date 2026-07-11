@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
-import type { AIProvider, ApiKeySaveResult, ApiKeyValidationResult } from '../../src/types/settings';
-import { maskApiKey, validateApiKeyFormat } from '../../src/utils/apiKeyValidator';
+import type { AIProvider, ApiKeyConnectionResult, ApiKeySaveResult, ApiKeyValidationResult } from '../../src/types/settings';
+import { maskApiKey, testApiKeyConnection, validateApiKeyFormat } from '../../src/utils/apiKeyValidator';
 import { getApiKey, removeApiKey, setApiKey } from '../store/secureStore';
 
 const registerHandler = <T extends unknown[]>(
@@ -46,5 +46,9 @@ export const registerSettingsHandlers = (): void => {
   registerHandler('remove-api-key', (_event, provider: AIProvider) => {
     removeApiKey(provider);
     return true;
+  });
+
+  registerHandler('test-api-key', async (_event, provider: AIProvider, key: string): Promise<ApiKeyConnectionResult> => {
+    return testApiKeyConnection(provider, key);
   });
 };

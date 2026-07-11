@@ -99,20 +99,20 @@ export default function ResultWorkspace({ onBackToForm }: Props) {
       exportSop,
     );
 
-  const exportRisk = () =>
+  const exportExcel = () =>
     run(
       async () => {
-        if (!risk) throw new Error('目前沒有風險評估可匯出。');
+        if (!sop) throw new Error('目前沒有 SOP 可匯出。');
         const dialog = await storageService.showSaveDialog({
-          title: '匯出 Excel 風險評估',
-          defaultPath: `${risk.eventName}-風險評估.xlsx`,
+          title: '匯出 Excel SOP',
+          defaultPath: `${sop.eventName}-SOP.xlsx`,
           filters: [{ name: 'Excel', extensions: ['xlsx'] }],
         });
         if (dialog.canceled || !dialog.filePath) return false;
-        await storageService.exportExcelDocument(risk, dialog.filePath);
+        await storageService.exportExcelDocument(sop, risk, dialog.filePath);
       },
-      'Excel 風險評估匯出完成。',
-      exportRisk,
+      'Excel SOP 匯出完成。',
+      exportExcel,
     );
 
   const busy = operation === 'processing';
@@ -148,7 +148,7 @@ export default function ResultWorkspace({ onBackToForm }: Props) {
             <Button startIcon={<DownloadRoundedIcon />} disabled={busy || !sop} onClick={() => void exportSop()}>
               Word
             </Button>
-            <Button startIcon={<DownloadRoundedIcon />} disabled={busy || !risk} onClick={() => void exportRisk()}>
+            <Button startIcon={<DownloadRoundedIcon />} disabled={busy || !sop} onClick={() => void exportExcel()}>
               Excel
             </Button>
             {busy ? <CircularProgress size={24} /> : null}

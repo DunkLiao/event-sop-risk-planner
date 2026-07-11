@@ -10,6 +10,7 @@ const STORE_KEY_FILE = `${STORE_NAME}.key`;
 export interface SecureSettingsSchema {
   'apiKeys.openai'?: string;
   'apiKeys.claude'?: string;
+  'apiKeys.openrouter'?: string;
 }
 
 const ensureUserDataDirectory = (userDataPath: string): void => {

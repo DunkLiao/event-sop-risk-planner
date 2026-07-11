@@ -1,6 +1,7 @@
 ﻿import { contextBridge, ipcRenderer } from 'electron';
 import type {
   AIProvider,
+  ApiKeyConnectionResult,
   ApiKeySaveResult,
   ApiKeyValidationResult,
   AppSettings,
@@ -22,7 +23,8 @@ const electronAPI: ElectronAPI = {
   generateSOP: (request: GenerateSOPRequest): Promise<SOPDocument> => ipcRenderer.invoke('generate-sop', request),
   generateRiskAssessment: (request: GenerateRiskRequest): Promise<RiskAssessment> => ipcRenderer.invoke('generate-risk-assessment', request),
   exportWordDocument: (sopData: SOPDocument, filePath: string): Promise<void> => ipcRenderer.invoke('export-word', sopData, filePath),
-  exportExcelDocument: (riskData: RiskAssessment, filePath: string): Promise<void> => ipcRenderer.invoke('export-excel', riskData, filePath),
+  exportExcelDocument: (sopData: SOPDocument, riskData: RiskAssessment | null, filePath: string): Promise<void> =>
+    ipcRenderer.invoke('export-excel', sopData, riskData, filePath),
   showSaveDialog: (options?: SaveDialogOptions): Promise<SaveDialogResult> => ipcRenderer.invoke('show-save-dialog', options),
   showOpenDialog: (options?: OpenDialogOptions) => ipcRenderer.invoke('show-open-dialog', options),
   saveProject: (projectData: Project) => ipcRenderer.invoke('save-project', projectData),
@@ -55,8 +57,10 @@ const electronAPI: ElectronAPI = {
   saveSettings: (settings: AppSettings) => ipcRenderer.invoke('save-settings', settings),
   saveApiKey: (provider: AIProvider, key: string): Promise<ApiKeySaveResult> => ipcRenderer.invoke('save-api-key', provider, key),
   getApiKey: (provider: AIProvider): Promise<string | null> => ipcRenderer.invoke('get-api-key', provider),
-  validateApiKey: (provider: AIProvider, key: string): Promise<ApiKeyValidationResult> =>
+validateApiKey: (provider: AIProvider, key: string): Promise<ApiKeyValidationResult> =>
     ipcRenderer.invoke('validate-api-key', provider, key),
+  testApiKeyConnection: (provider: AIProvider, key: string): Promise<ApiKeyConnectionResult> =>
+    ipcRenderer.invoke('test-api-key', provider, key),
   removeApiKey: (provider: AIProvider): Promise<boolean> => ipcRenderer.invoke('remove-api-key', provider),
   saveExportFile: request => ipcRenderer.invoke('save-export-file', request),
   openImportFile: (options?: OpenDialogOptions) => ipcRenderer.invoke('open-import-file', options),

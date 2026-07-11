@@ -12,8 +12,8 @@ const getStore = (): ReturnType<typeof createSecureStore> => {
   return secureStoreInstance;
 };
 
-const getStoreKey = (provider: AIProvider): 'apiKeys.openai' | 'apiKeys.claude' =>
-  provider === 'openai' ? 'apiKeys.openai' : 'apiKeys.claude';
+const getStoreKey = (provider: AIProvider): 'apiKeys.openai' | 'apiKeys.claude' | 'apiKeys.openrouter' =>
+  `apiKeys.${provider}` as 'apiKeys.openai' | 'apiKeys.claude' | 'apiKeys.openrouter';
 
 const ensureSafeStorage = (): void => {
   if (!safeStorage.isEncryptionAvailable()) {

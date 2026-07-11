@@ -1,5 +1,6 @@
 ﻿import type {
   AIProvider,
+  ApiKeyConnectionResult,
   ApiKeySaveResult,
   ApiKeyValidationResult,
   AppSettings,
@@ -48,7 +49,7 @@ export interface ElectronAPI {
   generateSOP: (request: GenerateSOPRequest) => Promise<SOPDocument>;
   generateRiskAssessment: (request: GenerateRiskRequest) => Promise<RiskAssessment>;
   exportWordDocument: (sopData: SOPDocument, filePath: string) => Promise<void>;
-  exportExcelDocument: (riskData: RiskAssessment, filePath: string) => Promise<void>;
+  exportExcelDocument: (sopData: SOPDocument, riskData: RiskAssessment | null, filePath: string) => Promise<void>;
   showSaveDialog: (options?: SaveDialogOptions) => Promise<SaveDialogResult>;
   showOpenDialog: (options?: OpenDialogOptions) => Promise<OpenDialogResult>;
   saveProject: (projectData: Project) => Promise<void>;
@@ -84,9 +85,10 @@ export interface ElectronAPI {
   getSettings: () => Promise<AppSettings | null>;
   getSettingsForExport: (includeApiKeys: boolean) => Promise<AppSettings>;
   saveSettings: (settings: AppSettings) => Promise<void>;
-  saveApiKey: (provider: AIProvider, key: string) => Promise<ApiKeySaveResult>;
+saveApiKey: (provider: AIProvider, key: string) => Promise<ApiKeySaveResult>;
   getApiKey: (provider: AIProvider) => Promise<string | null>;
   validateApiKey: (provider: AIProvider, key: string) => Promise<ApiKeyValidationResult>;
+  testApiKeyConnection: (provider: AIProvider, key: string) => Promise<ApiKeyConnectionResult>;
   removeApiKey: (provider: AIProvider) => Promise<boolean>;
   saveExportFile: (request: SaveExportFileRequest) => Promise<SaveDialogResult>;
   openImportFile: (options?: OpenDialogOptions) => Promise<OpenImportFileResult | null>;

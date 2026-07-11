@@ -38,6 +38,7 @@ const LOCALIZED_MESSAGES: Record<AILocale, Record<AIErrorCode, string>> = {
 const PROVIDER_LABELS: Record<AIProviderName, string> = {
   openai: 'OpenAI',
   claude: 'Claude',
+  openrouter: 'OpenRouter',
 };
 
 export interface AIServiceErrorOptions {

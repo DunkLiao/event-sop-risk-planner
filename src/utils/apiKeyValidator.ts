@@ -4,8 +4,9 @@ import type {
   ApiKeyValidationResult,
 } from '../types/settings.js';
 
-const OPENAI_KEY_PATTERN = /^sk-[A-Za-z0-9_-]{16,}$/;
-const CLAUDE_KEY_PATTERN = /^sk-ant-[A-Za-z0-9_-]{16,}$/;
+const OPENAI_KEY_PATTERN = /^sk-.{16,}$/;
+const CLAUDE_KEY_PATTERN = /^sk-ant-.{16,}$/;
+const OPENROUTER_KEY_PATTERN = /^sk-or-.{8,}$/;
 const CONNECTION_TIMEOUT_MS = 10000;
 
 const withTimeout = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -48,7 +49,9 @@ export const validateApiKeyFormat = (
   const isValid =
     provider === 'openai'
       ? OPENAI_KEY_PATTERN.test(trimmedKey)
-      : CLAUDE_KEY_PATTERN.test(trimmedKey);
+      : provider === 'claude'
+        ? CLAUDE_KEY_PATTERN.test(trimmedKey)
+        : OPENROUTER_KEY_PATTERN.test(trimmedKey);
 
   return {
     isValid,
@@ -56,7 +59,9 @@ export const validateApiKeyFormat = (
       ? 'API Key 格式正確。'
       : provider === 'openai'
         ? 'OpenAI API Key 格式應以 sk- 開頭。'
-        : 'Claude API Key 格式應以 sk-ant- 開頭。',
+        : provider === 'claude'
+          ? 'Claude API Key 格式應以 sk-ant- 開頭。'
+          : 'OpenRouter API Key 格式應以 sk-or- 開頭。',
   };
 };
 
@@ -87,19 +92,20 @@ export const testApiKeyConnection = async (
               Authorization: `Bearer ${trimmedKey}`,
             },
           })
-        : await withTimeout('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              'x-api-key': trimmedKey,
-              'anthropic-version': '2023-06-01',
-            },
-            body: JSON.stringify({
-              model: 'claude-3-5-haiku-20241022',
-              max_tokens: 1,
-              messages: [{ role: 'user', content: 'ping' }],
-            }),
-          });
+        : provider === 'claude'
+          ? await withTimeout('https://api.anthropic.com/v1/models', {
+              method: 'GET',
+              headers: {
+                'x-api-key': trimmedKey,
+                'anthropic-version': '2023-06-01',
+              },
+            })
+          : await withTimeout('https://openrouter.ai/api/v1/key', {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${trimmedKey}`,
+              },
+            });
 
     if (response.ok) {
       return {
@@ -125,7 +131,7 @@ export const testApiKeyConnection = async (
       message:
         error instanceof Error && error.name === 'AbortError'
           ? 'API 連線測試逾時。'
-          : 'API 連線測試失敗，請稍後再試。',
+          : `API 連線測試失敗：${error instanceof Error ? error.message : String(error)}`,
     };
   }
 };

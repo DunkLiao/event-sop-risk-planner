@@ -16,14 +16,14 @@ export const defaultSettings: AppSettings = {
     openai: {
       apiKey: '',
       model: 'gpt-4o',
-      temperature: 0.7,
-      maxTokens: 4000,
     },
     claude: {
       apiKey: '',
       model: 'claude-3-5-sonnet-20241022',
-      temperature: 0.7,
-      maxTokens: 4000,
+    },
+    openrouter: {
+      apiKey: '',
+      model: 'openai/gpt-4o',
     },
   },
   document: {
@@ -53,6 +53,10 @@ export const sanitizeAppSettings = (settings: AppSettings): AppSettings => ({
     },
     claude: {
       ...settings.ai.claude,
+      apiKey: '',
+    },
+    openrouter: {
+      ...settings.ai.openrouter,
       apiKey: '',
     },
   },

@@ -12,6 +12,7 @@ interface RetryConfig {
 
 export interface OpenAIServiceOptions extends RetryConfig {
   client?: Pick<OpenAI, 'chat'>;
+  providerName?: AIProviderName;
 }
 
 export interface ClaudeServiceOptions extends RetryConfig {
@@ -189,17 +190,21 @@ export abstract class AIService {
  * OpenAI 服務
  */
 export class OpenAIService extends AIService {
-  private readonly client: Pick<OpenAI, 'chat'>;
+  protected readonly providerName: AIProviderName = 'openai';
+  protected readonly client: Pick<OpenAI, 'chat'>;
 
   constructor(apiKey: string, model: string, options: OpenAIServiceOptions = {}) {
     super(apiKey, model, options);
     this.client = options.client ?? new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+    if (options.providerName) {
+      this.providerName = options.providerName;
+    }
   }
 
   async generateCompletion(request: AIRequest): Promise<AIResponse> {
-    this.validateApiKey('openai');
+    this.validateApiKey(this.providerName);
 
-    return this.executeWithRetry('openai', async () => {
+    return this.executeWithRetry(this.providerName, async () => {
       const resolvedModel = request.model ?? this.model;
       const messages = [] as Array<{ role: 'system' | 'user'; content: string }>;
 
@@ -246,7 +251,7 @@ export class OpenAIService extends AIService {
         }
 
         return {
-          ...this.buildResponse('openai', content, usage, finishReason),
+          ...this.buildResponse(this.providerName, content, usage, finishReason),
           model: resolvedModel,
         };
       }
@@ -269,7 +274,7 @@ export class OpenAIService extends AIService {
         : undefined;
 
       return {
-        ...this.buildResponse('openai', content, usage, choice?.finish_reason ?? undefined),
+        ...this.buildResponse(this.providerName, content, usage, choice?.finish_reason ?? undefined),
         model: resolvedModel,
       };
     });
@@ -366,6 +371,20 @@ export class ClaudeService extends AIService {
 }
 
 /**
+ * OpenRouter 服務（OpenAI 相容 API）
+ */
+export class OpenRouterService extends OpenAIService {
+  constructor(apiKey: string, model: string, options: OpenAIServiceOptions = {}) {
+    const client = options.client ?? new OpenAI({
+      apiKey,
+      baseURL: 'https://openrouter.ai/api/v1',
+      dangerouslyAllowBrowser: true,
+    });
+    super(apiKey, model, { ...options, client, providerName: 'openrouter' });
+  }
+}
+
+/**
  * AI 服務工廠
  */
 export class AIServiceFactory {
@@ -380,6 +399,8 @@ export class AIServiceFactory {
         return new OpenAIService(apiKey, model, { locale });
       case 'claude':
         return new ClaudeService(apiKey, model, { locale });
+      case 'openrouter':
+        return new OpenRouterService(apiKey, model, { locale });
       default:
         throw new AIServiceError('unsupported_provider', locale, { provider });
     }

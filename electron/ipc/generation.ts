@@ -27,9 +27,9 @@ export const registerGenerationHandlers = (): void => {
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     await word.generateSOPDocument(document as SOPDocument, filePath);
   });
-  register('export-excel', async (assessment, filePath) => {
+  register('export-excel', async (document, assessment, filePath) => {
     if (typeof filePath !== 'string' || !filePath.trim()) throw new Error('未提供 Excel 輸出路徑。');
     await fs.mkdir(path.dirname(filePath), { recursive: true });
-    await excel.generateRiskDocument(assessment as RiskAssessment, filePath);
+    await excel.generateSOPWorkbook(document as SOPDocument, filePath, assessment as RiskAssessment | null);
   });
 };

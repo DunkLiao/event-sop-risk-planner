@@ -14,14 +14,14 @@ const createSettings = (): AppSettings => ({
     openai: {
       apiKey: 'sk-test-openai-key-123456',
       model: 'gpt-4o',
-      temperature: 0.3,
-      maxTokens: 200,
     },
     claude: {
       apiKey: 'sk-ant-test-claude-key-123456',
       model: 'claude-3-5-sonnet-20241022',
-      temperature: 0.3,
-      maxTokens: 200,
+    },
+    openrouter: {
+      apiKey: 'sk-or-test-openrouter-key-123456',
+      model: 'openai/gpt-4o',
     },
   },
   document: {

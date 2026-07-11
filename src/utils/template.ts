@@ -39,6 +39,23 @@ const createId = (prefix: string): string => `${prefix}-${generateId()}`;
 
 const cloneValue = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
+const createUniqueTemplateName = (baseName: string, existingTemplates: Template[]): string => {
+  const existingNames = new Set(existingTemplates.map(template => template.name));
+  const safeBaseName = baseName.trim() || '未命名範本';
+  const initialName = `${safeBaseName}（匯入副本）`;
+
+  if (!existingNames.has(initialName)) {
+    return initialName;
+  }
+
+  let counter = 2;
+  while (existingNames.has(`${initialName} ${counter}`)) {
+    counter += 1;
+  }
+
+  return `${initialName} ${counter}`;
+};
+
 export const getTemplateTypeLabel = (type: TemplateType): string => TEMPLATE_TYPE_LABELS[type];
 
 export const getTemplateEventTypeLabel = (eventType: string): string =>
@@ -97,6 +114,15 @@ export const buildTemplateFromProject = (
     createdAt: new Date().toISOString(),
   });
 };
+
+export const cloneTemplateForImport = (template: Template, existingTemplates: Template[]): Template =>
+  normalizeTemplate({
+    ...cloneValue(template),
+    id: createId('template'),
+    name: createUniqueTemplateName(template.name, existingTemplates),
+    isDefault: false,
+    createdAt: new Date().toISOString(),
+  });
 
 const normalizeSopTasks = (tasks: Partial<SOPTask>[] = []): SOPTask[] =>
   tasks.map(task => ({

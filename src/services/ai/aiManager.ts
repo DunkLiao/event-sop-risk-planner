@@ -1,6 +1,6 @@
 import { useSettingsStore } from '../../store/settingsStore.js';
 import { AIRequest, AIResponse, AILocale, AIProviderName } from '../../types/ai.js';
-import { AppSettings } from '../../types/settings.js';
+import { AIProvider, AppSettings } from '../../types/settings.js';
 import { AIService, AIServiceFactory } from './aiService.js';
 import { AIServiceError, InvalidAPIKeyError, RateLimitError } from './errors.js';
 
@@ -25,7 +25,7 @@ const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const DEFAULT_MIN_REQUEST_INTERVAL_MS = 750;
 
 /**
- * 統一管理 OpenAI 與 Claude 請求。
+ * 統一管理 OpenAI、Claude 與 OpenRouter 請求。
  */
 export class AIManager {
   private readonly cache = new Map<string, CacheEntry>();
@@ -76,8 +76,8 @@ export class AIManager {
         ...request,
         provider,
         model: request.model ?? providerSettings.model,
-        temperature: request.temperature ?? providerSettings.temperature,
-        maxTokens: request.maxTokens ?? providerSettings.maxTokens,
+        temperature: request.temperature,
+        maxTokens: request.maxTokens,
         locale,
       };
 
@@ -134,14 +134,14 @@ export class AIManager {
       return [preferred];
     }
 
-    const orderedProviders: AIProviderName[] = [settings.ai.defaultProvider];
-    const fallbackProvider: AIProviderName = settings.ai.defaultProvider === 'openai' ? 'claude' : 'openai';
+    const allProviders: AIProvider[] = ['openai', 'claude', 'openrouter'];
+    const availableProviders = allProviders.filter(provider => Boolean(settings.ai[provider].apiKey.trim()));
 
-    if (!orderedProviders.includes(fallbackProvider)) {
-      orderedProviders.push(fallbackProvider);
-    }
+    const defaultProvider = settings.ai.defaultProvider;
+    const others = availableProviders.filter(provider => provider !== defaultProvider);
+    const ordered = [defaultProvider, ...others];
 
-    return orderedProviders.filter(provider => Boolean(settings.ai[provider].apiKey.trim()));
+    return ordered.filter(provider => availableProviders.includes(provider));
   }
 
   private async getCachedResponse(request: AIRequest): Promise<AIResponse | null> {

@@ -39,6 +39,7 @@ import { formatDateTime } from '../../utils/helpers';
 import {
   getTemplateEventTypeLabel,
   getTemplateTypeLabel,
+  cloneTemplateForImport,
   TEMPLATE_SORT_LABELS,
 } from '../../utils/template';
 import TemplateEditor from './TemplateEditor';
@@ -132,16 +133,26 @@ function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
   };
 
   const handleImportTemplate = async () => {
-    const dialogResult = await storageService.showOpenDialog({
-      title: '匯入範本',
-      filters: [{ name: 'JSON', extensions: ['json'] }],
-      properties: ['openFile'],
-    });
+    try {
+      setError(null);
+      const dialogResult = await storageService.showOpenDialog({
+        title: '匯入範本',
+        filters: [{ name: 'JSON', extensions: ['json'] }],
+        properties: ['openFile'],
+      });
 
-    const filePath = dialogResult.filePaths[0];
-    if (!dialogResult.canceled && filePath) {
-      await storageService.importTemplate(filePath);
+      const filePath = dialogResult.filePaths[0];
+      if (dialogResult.canceled || !filePath) {
+        return;
+      }
+
+      const importedTemplate = await storageService.importTemplate(filePath);
+      const existingTemplates = await storageService.loadTemplates();
+      const importedCopy = cloneTemplateForImport(importedTemplate, existingTemplates);
+      await storageService.saveTemplate(importedCopy);
       await loadTemplates();
+    } catch (importError) {
+      setError(importError instanceof Error ? importError.message : '匯入範本失敗。');
     }
   };
 

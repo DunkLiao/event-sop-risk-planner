@@ -205,14 +205,12 @@ export const useEventForm = () => {
 
   const updateValues = useCallback(
     (updater: (previousValues: EventFormData) => EventFormData) => {
-      setValues(previousValues => {
-        const nextValues = updater(previousValues);
-        setErrors(validateFormValues(nextValues));
-        setEventFormData(nextValues);
-        return nextValues;
-      });
+      const nextValues = updater(values);
+      setValues(nextValues);
+      setErrors(validateFormValues(nextValues));
+      setEventFormData(nextValues);
     },
-    [setEventFormData]
+    [setEventFormData, values]
   );
 
   const handleFieldChange = useCallback(

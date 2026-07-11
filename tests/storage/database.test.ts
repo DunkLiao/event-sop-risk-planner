@@ -153,14 +153,14 @@ const sampleSettings: AppSettings = {
     openai: {
       apiKey: 'test-openai-key',
       model: 'gpt-4o',
-      temperature: 0.4,
-      maxTokens: 2048,
     },
     claude: {
       apiKey: 'test-claude-key',
       model: 'claude-3-5-sonnet-20241022',
-      temperature: 0.3,
-      maxTokens: 4096,
+    },
+    openrouter: {
+      apiKey: 'test-openrouter-key',
+      model: 'openai/gpt-4o',
     },
   },
   document: {

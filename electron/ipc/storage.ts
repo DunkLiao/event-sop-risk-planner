@@ -15,14 +15,14 @@ const DEFAULT_SETTINGS: AppSettings = {
     openai: {
       apiKey: '',
       model: 'gpt-4o',
-      temperature: 0.7,
-      maxTokens: 4000,
     },
     claude: {
       apiKey: '',
       model: 'claude-3-5-sonnet-20241022',
-      temperature: 0.7,
-      maxTokens: 4000,
+    },
+    openrouter: {
+      apiKey: '',
+      model: 'openai/gpt-4o',
     },
   },
   document: {
@@ -109,13 +109,17 @@ const getSettingsForExport = (includeApiKeys: boolean): AppSettings => {
     ...storedSettings,
     ai: {
       ...storedSettings.ai,
-      openai: {
+openai: {
         ...storedSettings.ai.openai,
         apiKey: includeApiKeys ? getApiKey('openai') ?? '' : '',
       },
       claude: {
         ...storedSettings.ai.claude,
         apiKey: includeApiKeys ? getApiKey('claude') ?? '' : '',
+      },
+      openrouter: {
+        ...storedSettings.ai.openrouter,
+        apiKey: includeApiKeys ? getApiKey('openrouter') ?? '' : '',
       },
     },
   };
@@ -173,7 +177,7 @@ export const registerStorageHandlers = (): void => {
     getDatabase().createProjectFromTemplate(templateId, projectName)
   );
 
-  registerHandler('save-settings', (_event, settings: AppSettings) => {
+registerHandler('save-settings', (_event, settings: AppSettings) => {
     getDatabase().saveAppSettings({
       ...settings,
       ai: {
@@ -184,6 +188,10 @@ export const registerStorageHandlers = (): void => {
         },
         claude: {
           ...settings.ai.claude,
+          apiKey: '',
+        },
+        openrouter: {
+          ...settings.ai.openrouter,
           apiKey: '',
         },
       },

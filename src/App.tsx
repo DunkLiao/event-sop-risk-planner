@@ -3,6 +3,7 @@ import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import CssBaseline from '@mui/material/CssBaseline';
 import {
   AppBar,
@@ -32,6 +33,7 @@ import ProjectList from './components/ProjectList/ProjectList';
 import TemplateManager from './components/TemplateManager/TemplateManager';
 import TemplatePickerDialog from './components/TemplateManager/TemplatePickerDialog';
 import ResultWorkspace from './components/ResultWorkspace';
+import SettingsPanel from './components/SettingsPanel';
 import { storageService } from './services/storage/storageService';
 import { useAppStore } from './store/appStore';
 import type { Project, ProjectStatus } from './types/settings';
@@ -79,6 +81,7 @@ function App() {
   const [duplicateDialogProject, setDuplicateDialogProject] = useState<Project | null>(null);
   const [templateDialogProject, setTemplateDialogProject] = useState<Project | null>(null);
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [dialogLoading, setDialogLoading] = useState(false);
   const projectList = useAppStore(state => state.projectList);
   const projectStats = useAppStore(state => state.projectStats);
@@ -230,6 +233,13 @@ function App() {
               }}
             >
               範本管理
+            </Button>
+            <Button
+              color="inherit"
+              startIcon={<SettingsRoundedIcon />}
+              onClick={() => setSettingsOpen(true)}
+            >
+              設定
             </Button>
           </Toolbar>
         </AppBar>
@@ -437,11 +447,12 @@ function App() {
         onClose={() => setTemplateDialogProject(null)}
         onSaved={() => refreshProjectList()}
       />
-      <TemplatePickerDialog
+<TemplatePickerDialog
         open={templatePickerOpen}
         onClose={() => setTemplatePickerOpen(false)}
         onProjectCreated={handleProjectCreatedFromTemplate}
       />
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </ThemeProvider>
   );
 }

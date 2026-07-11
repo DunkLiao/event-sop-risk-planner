@@ -1,3 +1,4 @@
+import type { AIProvider } from '../types/settings.js';
 import { isValidApiKey as validateProviderApiKey } from './apiKeyValidator.js';
 
 /**
@@ -20,7 +21,7 @@ export const isValidDateRange = (startDate: string, endDate: string): boolean =>
 /**
  * 驗證 API Key 格式
  */
-export const isValidApiKey = (apiKey: string, provider: 'openai' | 'claude'): boolean => {
+export const isValidApiKey = (apiKey: string, provider: AIProvider): boolean => {
   return validateProviderApiKey(apiKey, provider);
 };
 

@@ -16,7 +16,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Slider,
   Stack,
   TextField,
   Typography,
@@ -25,7 +24,6 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { storageService } from '../../services/storage/storageService';
 import { defaultSettings, sanitizeAppSettings, useSettingsStore } from '../../store/settingsStore';
 import type { AIProvider, AppSettings } from '../../types/settings';
-import { testApiKeyConnection } from '../../utils/apiKeyValidator';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -37,31 +35,29 @@ type ProviderState = Record<AIProvider, string | null>;
 type ProviderInputState = Record<AIProvider, string>;
 type ProviderLoadingState = Record<AIProvider, boolean>;
 
-const MODEL_OPTIONS: Record<AIProvider, string[]> = {
-  openai: ['gpt-4o', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4o-mini'],
-  claude: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-7-sonnet-latest'],
-};
-
 const PROVIDER_LABELS: Record<AIProvider, string> = {
   openai: 'OpenAI',
   claude: 'Claude',
+  openrouter: 'OpenRouter',
 };
 
 const createProviderFeedback = (): ProviderFeedback => ({
   openai: null,
   claude: null,
+  openrouter: null,
 });
 
 const createProviderLoading = (): ProviderLoadingState => ({
   openai: false,
   claude: false,
+  openrouter: false,
 });
 
 function SettingsPanel({ open, onClose }: SettingsPanelProps) {
   const setStoredSettings = useSettingsStore(state => state.setSettings);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
-  const [apiKeyInputs, setApiKeyInputs] = useState<ProviderInputState>({ openai: '', claude: '' });
-  const [maskedKeys, setMaskedKeys] = useState<ProviderState>({ openai: null, claude: null });
+  const [apiKeyInputs, setApiKeyInputs] = useState<ProviderInputState>({ openai: '', claude: '', openrouter: '' });
+  const [maskedKeys, setMaskedKeys] = useState<ProviderState>({ openai: null, claude: null, openrouter: null });
   const [feedback, setFeedback] = useState<ProviderFeedback>(createProviderFeedback);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -79,17 +75,18 @@ function SettingsPanel({ open, onClose }: SettingsPanelProps) {
       setStatusMessage(null);
 
       try {
-        const [storedSettings, openaiKey, claudeKey] = await Promise.all([
-          storageService.getSettings(),
-          storageService.getApiKey('openai'),
-          storageService.getApiKey('claude'),
-        ]);
-        const nextSettings = sanitizeAppSettings(storedSettings ?? defaultSettings);
+const [storedSettings, openaiKey, claudeKey, openrouterKey] = await Promise.all([
+        storageService.getSettings(),
+        storageService.getApiKey('openai'),
+        storageService.getApiKey('claude'),
+        storageService.getApiKey('openrouter'),
+      ]);
+      const nextSettings = sanitizeAppSettings(storedSettings ?? defaultSettings);
 
-        setSettings(nextSettings);
-        setStoredSettings(nextSettings);
-        setMaskedKeys({ openai: openaiKey, claude: claudeKey });
-        setApiKeyInputs({ openai: '', claude: '' });
+      setSettings(nextSettings);
+      setStoredSettings(nextSettings);
+      setMaskedKeys({ openai: openaiKey, claude: claudeKey, openrouter: openrouterKey });
+      setApiKeyInputs({ openai: '', claude: '', openrouter: '' });
         setFeedback(createProviderFeedback());
       } catch (error) {
         setStatusMessage({
@@ -117,7 +114,7 @@ function SettingsPanel({ open, onClose }: SettingsPanelProps) {
 
   const handleProviderSettingChange = (
     provider: AIProvider,
-    key: 'model' | 'temperature' | 'maxTokens',
+    key: 'model',
     value: number | string
   ) => {
     setSettings(currentSettings => ({
@@ -177,13 +174,21 @@ function SettingsPanel({ open, onClose }: SettingsPanelProps) {
         return;
       }
 
-      const result = await testApiKeyConnection(provider, apiKey);
+      const result = await storageService.testApiKeyConnection(provider, apiKey);
 
       setFeedback(currentFeedback => ({
         ...currentFeedback,
         [provider]: {
           severity: result.success ? 'success' : 'error',
           message: result.message,
+        },
+      }));
+    } catch (error) {
+      setFeedback(currentFeedback => ({
+        ...currentFeedback,
+        [provider]: {
+          severity: 'error',
+          message: error instanceof Error ? error.message : 'API 連線測試失敗，請稍後再試。',
         },
       }));
     } finally {
@@ -280,7 +285,7 @@ function SettingsPanel({ open, onClose }: SettingsPanelProps) {
 
         setMaskedKeys(nextMaskedKeys);
         setFeedback(nextFeedback);
-        setApiKeyInputs({ openai: '', claude: '' });
+        setApiKeyInputs({ openai: '', claude: '', openrouter: '' });
       }
 
       setStoredSettings(sanitizedSettings);
@@ -328,6 +333,7 @@ function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                 >
                   <MenuItem value="openai">OpenAI</MenuItem>
                   <MenuItem value="claude">Claude</MenuItem>
+                  <MenuItem value="openrouter">OpenRouter</MenuItem>
                 </Select>
               </FormControl>
 
@@ -394,65 +400,15 @@ function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                       helperText="API Key 只會儲存在 Electron 主程序的安全儲存中。"
                     />
 
-                    <Box
-                      sx={{
-                        display: 'grid',
-                        gap: 2,
-                        gridTemplateColumns: {
-                          xs: 'minmax(0, 1fr)',
-                          md: '1fr 1fr',
-                        },
-                      }}
-                    >
-                      <FormControl fullWidth>
-                        <InputLabel id={`${provider}-model-label`}>模型</InputLabel>
-                        <Select
-                          labelId={`${provider}-model-label`}
-                          label="模型"
-                          value={settings.ai[provider].model}
-                          onChange={event =>
-                            handleProviderSettingChange(provider, 'model', event.target.value)
-                          }
-                        >
-                          {MODEL_OPTIONS[provider].map(model => (
-                            <MenuItem key={model} value={model}>
-                              {model}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-
-                      <TextField
-                        fullWidth
-                        type="number"
-                        label="Max Tokens"
-                        value={settings.ai[provider].maxTokens}
-                        onChange={event =>
-                          handleProviderSettingChange(
-                            provider,
-                            'maxTokens',
-                            Math.max(1, Number(event.target.value) || 1)
-                          )
-                        }
-                        slotProps={{
-                          htmlInput: { min: 1, step: 100 },
-                        }}
-                      />
-                    </Box>
-
-                    <Box>
-                      <Typography gutterBottom>Temperature：{settings.ai[provider].temperature.toFixed(1)}</Typography>
-                      <Slider
-                        value={settings.ai[provider].temperature}
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        marks
-                        onChange={(_event, value) =>
-                          handleProviderSettingChange(provider, 'temperature', value as number)
-                        }
-                      />
-                    </Box>
+                    <TextField
+                      fullWidth
+                      label="模型"
+                      value={settings.ai[provider].model}
+                      onChange={event =>
+                        handleProviderSettingChange(provider, 'model', event.target.value)
+                      }
+                      helperText={provider === 'openrouter' ? '格式：provider/model，例如 openai/gpt-4o' : '請輸入模型名稱'}
+                    />
 
                     {feedback[provider] ? (
                       <Alert severity={feedback[provider].severity}>{feedback[provider].message}</Alert>

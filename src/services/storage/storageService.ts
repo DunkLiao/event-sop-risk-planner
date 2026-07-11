@@ -1,6 +1,7 @@
 ﻿import type { ElectronAPI, OpenDialogOptions, OpenDialogResult, SaveDialogOptions, SaveDialogResult } from '../../types/electron';
 import type {
   AIProvider,
+  ApiKeyConnectionResult,
   ApiKeySaveResult,
   ApiKeyValidationResult,
   AppSettings,
@@ -81,8 +82,12 @@ export class StorageService {
     return this.electronAPI.getApiKey(provider);
   }
 
-  async validateApiKey(provider: AIProvider, key: string): Promise<ApiKeyValidationResult> {
+async validateApiKey(provider: AIProvider, key: string): Promise<ApiKeyValidationResult> {
     return this.electronAPI.validateApiKey(provider, key);
+  }
+
+  async testApiKeyConnection(provider: AIProvider, key: string): Promise<ApiKeyConnectionResult> {
+    return this.electronAPI.testApiKeyConnection(provider, key);
   }
 
   async removeApiKey(provider: AIProvider): Promise<boolean> {
@@ -101,8 +106,8 @@ export class StorageService {
     await this.electronAPI.exportWordDocument(document, filePath);
   }
 
-  async exportExcelDocument(assessment: RiskAssessment, filePath: string): Promise<void> {
-    await this.electronAPI.exportExcelDocument(assessment, filePath);
+  async exportExcelDocument(sop: SOPDocument, assessment: RiskAssessment | null, filePath: string): Promise<void> {
+    await this.electronAPI.exportExcelDocument(sop, assessment, filePath);
   }
 
   async exportProject(project: Project, filePath: string): Promise<void> {

@@ -51,9 +51,106 @@ const severityColor: Record<RiskSeverity, string> = {
 };
 
 export class ExcelDocumentService {
+  async generateSOPWorkbook(sop: SOPDocument, filePath: string, risk?: RiskAssessment | null): Promise<void> {
+    if (!sop.eventName.trim()) throw new Error('活動名稱不可為空。');
+    if (sop.sections.length === 0) throw new Error('SOP 必須包含至少一個章節。');
+
+    const workbook = this.createWorkbook();
+    this.addSOPSheets(workbook, sop);
+
+    if (risk) {
+      this.addRiskSheets(workbook, risk);
+    }
+
+    await workbook.xlsx.writeFile(filePath);
+  }
+
   async generateRiskDocument(risk: RiskAssessment, filePath: string): Promise<void> {
+    const workbook = this.createWorkbook();
+    this.addRiskSheets(workbook, risk);
+    await workbook.xlsx.writeFile(filePath);
+  }
+
+  private createWorkbook(): ExcelJS.Workbook {
     const workbook = new ExcelJS.Workbook();
     workbook.creator = '活動 SOP 與風險規劃生成器';
+    return workbook;
+  }
+
+  private addSOPSheets(workbook: ExcelJS.Workbook, sop: SOPDocument): void {
+    const sections = workbook.addWorksheet('SOP 章節');
+    sections.columns = [
+      { header: '章節', key: 'title', width: 24 },
+      { header: '順序', key: 'order', width: 10 },
+      { header: '內容', key: 'content', width: 42 },
+      { header: '任務', key: 'task', width: 24 },
+      { header: '任務說明', key: 'taskDescription', width: 36 },
+      { header: '負責人', key: 'responsible', width: 16 },
+      { header: '期限', key: 'deadline', width: 16 },
+      { header: '狀態', key: 'status', width: 14 },
+    ];
+
+    [...sop.sections]
+      .sort((a, b) => a.order - b.order)
+      .forEach(section => {
+        if (section.tasks.length === 0) {
+          sections.addRow({
+            title: section.title,
+            order: section.order,
+            content: section.content,
+          });
+          return;
+        }
+
+        section.tasks.forEach(task => {
+          sections.addRow({
+            title: section.title,
+            order: section.order,
+            content: section.content,
+            task: task.title,
+            taskDescription: task.description,
+            responsible: task.responsible,
+            deadline: task.deadline ?? '',
+            status: task.status,
+          });
+        });
+      });
+    this.formatTableSheet(sections, 'A1:H1');
+
+    const timeline = workbook.addWorksheet('SOP 時程');
+    timeline.columns = [
+      { header: '日期', key: 'date', width: 16 },
+      { header: '時間', key: 'time', width: 12 },
+      { header: '里程碑', key: 'milestone', width: 28 },
+      { header: '說明', key: 'description', width: 42 },
+    ];
+    sop.timeline.forEach(item => {
+      timeline.addRow({
+        date: item.date,
+        time: item.time ?? '',
+        milestone: item.milestone,
+        description: item.description,
+      });
+    });
+    this.formatTableSheet(timeline, 'A1:D1');
+
+    const checklist = workbook.addWorksheet('SOP 檢核表');
+    checklist.columns = [
+      { header: '完成', key: 'checked', width: 10 },
+      { header: '分類', key: 'category', width: 18 },
+      { header: '項目', key: 'item', width: 42 },
+    ];
+    sop.checklist.forEach(item => {
+      checklist.addRow({
+        checked: item.checked ? '是' : '否',
+        category: item.category,
+        item: item.item,
+      });
+    });
+    this.formatTableSheet(checklist, 'A1:C1');
+  }
+
+  private addRiskSheets(workbook: ExcelJS.Workbook, risk: RiskAssessment): void {
     const list = workbook.addWorksheet('風險清單');
     list.columns = [
       { header: '風險', key: 'title', width: 22 }, { header: '分類', key: 'category', width: 16 },
@@ -94,7 +191,14 @@ export class ExcelDocumentService {
     ]);
     summary.getColumn(1).font = { bold: true };
     summary.columns = [{ width: 18 }, { width: 30 }];
+  }
 
-    await workbook.xlsx.writeFile(filePath);
+  private formatTableSheet(sheet: ExcelJS.Worksheet, autoFilter: string): void {
+    sheet.getRow(1).font = { bold: true };
+    sheet.views = [{ state: 'frozen', ySplit: 1 }];
+    sheet.autoFilter = autoFilter;
+    sheet.eachRow(row => {
+      row.alignment = { vertical: 'top', wrapText: true };
+    });
   }
 }

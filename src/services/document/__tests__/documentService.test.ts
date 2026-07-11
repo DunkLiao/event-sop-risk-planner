@@ -38,4 +38,24 @@ describe('document services', () => {
     expect(workbook.worksheets.map(sheet => sheet.name)).toEqual(['風險清單', '風險矩陣', '摘要']);
     expect(workbook.getWorksheet('風險清單')?.getCell('A2').value).toBe('人流');
   });
+
+  it('writes an Excel workbook that includes SOP sheets and optional risk sheets', async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'event-sop-excel-'));
+    const file = path.join(dir, 'sop-and-risk.xlsx');
+    await new ExcelDocumentService().generateSOPWorkbook(sop, file, risk);
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(file);
+    expect(workbook.worksheets.map(sheet => sheet.name)).toEqual([
+      'SOP 章節',
+      'SOP 時程',
+      'SOP 檢核表',
+      '風險清單',
+      '風險矩陣',
+      '摘要',
+    ]);
+    expect(workbook.getWorksheet('SOP 章節')?.getCell('A2').value).toBe('準備');
+    expect(workbook.getWorksheet('SOP 時程')?.getCell('C2').value).toBe('場勘');
+    expect(workbook.getWorksheet('SOP 檢核表')?.getCell('C2').value).toBe('消防檢查');
+    expect(workbook.getWorksheet('風險清單')?.getCell('A2').value).toBe('人流');
+  });
 });

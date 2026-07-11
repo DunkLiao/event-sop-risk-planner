@@ -1,7 +1,7 @@
 ﻿import { defaultSettings, sanitizeAppSettings } from '../../store/settingsStore';
 import type { EventInfo, SOPDocument } from '../../types/event';
 import type { RiskAssessment } from '../../types/risk';
-import type { AppSettings, Project, ProjectStatus, Template, TemplateContent } from '../../types/settings';
+import type { AIProvider, AppSettings, Project, ProjectStatus, Template, TemplateContent } from '../../types/settings';
 import type {
   ConflictResolutionStrategy,
   ImportExportPayload,
@@ -627,7 +627,7 @@ class ImportService {
       return;
     }
 
-    for (const provider of ['openai', 'claude'] as const) {
+    for (const provider of ['openai', 'claude', 'openrouter'] as AIProvider[]) {
       const importedApiKey = normalizedImportedSettings.ai[provider].apiKey?.trim() ?? '';
 
       if (importedApiKey) {
