@@ -11,6 +11,9 @@
   TemplateFilter,
 } from './settings';
 import type { MenuAction, OpenImportFileResult, SaveExportFileRequest } from './importExport';
+import type { GenerateRiskRequest, GenerateSOPRequest } from './ai';
+import type { SOPDocument } from './event';
+import type { RiskAssessment } from './risk';
 
 export interface SaveDialogOptions {
   title?: string;
@@ -42,10 +45,10 @@ export interface OpenDialogResult {
 
 export interface ElectronAPI {
   ping: () => Promise<unknown>;
-  generateSOP: (eventData: unknown) => Promise<unknown>;
-  generateRiskAssessment: (eventData: unknown) => Promise<unknown>;
-  exportWordDocument: (sopData: unknown, filePath: string) => Promise<unknown>;
-  exportExcelDocument: (riskData: unknown, filePath: string) => Promise<unknown>;
+  generateSOP: (request: GenerateSOPRequest) => Promise<SOPDocument>;
+  generateRiskAssessment: (request: GenerateRiskRequest) => Promise<RiskAssessment>;
+  exportWordDocument: (sopData: SOPDocument, filePath: string) => Promise<void>;
+  exportExcelDocument: (riskData: RiskAssessment, filePath: string) => Promise<void>;
   showSaveDialog: (options?: SaveDialogOptions) => Promise<SaveDialogResult>;
   showOpenDialog: (options?: OpenDialogOptions) => Promise<OpenDialogResult>;
   saveProject: (projectData: Project) => Promise<void>;
@@ -61,7 +64,20 @@ export interface ElectronAPI {
   importProject: (filePath: string) => Promise<Project>;
   saveTemplate: (templateData: Template) => Promise<void>;
   loadTemplates: (filter?: TemplateFilter) => Promise<Template[]>;
+  getDefaultTemplates: () => Promise<Template[]>;
   getTemplateById: (templateId: string) => Promise<Template | null>;
+  setDefaultTemplate: (templateId: string, isDefault: boolean) => Promise<void>;
+  createTemplateFromProject: (
+    projectId: string,
+    templateName: string,
+    options?: {
+      includeSop?: boolean;
+      includeRisk?: boolean;
+      includeEventSettings?: boolean;
+      isDefault?: boolean;
+    }
+  ) => Promise<Template>;
+  createProjectFromTemplate: (templateId: string, projectName: string) => Promise<Project>;
   deleteTemplate: (templateId: string) => Promise<void>;
   exportTemplate: (templateData: Template, filePath: string) => Promise<void>;
   importTemplate: (filePath: string) => Promise<Template>;

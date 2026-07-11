@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "composite": true,
+    "target": "ES2022",
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -10,8 +11,10 @@
   "include": [
     "vite.config.ts",
     "electron",
-    "src/services/storage/database.ts",
+    "src/services/**/*.ts",
+    "src/store/settingsStore.ts",
+    "src/templates/**/*.ts",
     "src/types/**/*.ts",
-    "src/utils/apiKeyValidator.ts"
+    "src/utils/**/*.ts"
   ]
 }

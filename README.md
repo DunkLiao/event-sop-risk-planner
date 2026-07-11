@@ -1,96 +1,66 @@
 # 活動 SOP 與風險規劃生成器
 
-基於 React + Electron + AI 的跨平台桌面應用程式，自動生成活動標準作業流程 (SOP) 與風險評估報告。
+基於 React + Electron 的桌面應用程式，用來輸入活動資訊、生成 SOP 與風險評估，並提供可直接編輯與匯出的結果工作區。
 
-## 專案狀態
+## 目前完成度
 
-✅ Phase 1: 專案基礎建置 - **進行中**
-- ✅ 專案結構初始化
-- ✅ 配置檔案設定完成
-- ✅ 基本資料夾架構建立
-- ✅ TypeScript 型別定義完成
+- P0 基礎與建置已完成
+- Phase 2 結果預覽與編輯介面已完成
+- Word / Excel 匯出已完成
+- Electron AI IPC 已完成
 
-## 技術棧
+## 主要功能
 
-- **前端**: React 19 + TypeScript 5.6
-- **桌面框架**: Electron 43
-- **建置工具**: Vite 8
-- **UI 框架**: Material-UI (MUI) 9
-- **狀態管理**: Zustand
-- **AI 整合**: OpenAI API / Anthropic Claude API
-- **文件生成**: docx, exceljs
-- **程式碼品質**: ESLint + Prettier
-
-## 專案結構
-
-```
-event-sop-risk-planner/
-├── electron/               # Electron 主程序
-│   ├── main.ts            # 主程序入口
-│   └── preload.ts         # 預載腳本
-├── src/                   # React 應用程式
-│   ├── components/        # UI 元件
-│   ├── services/          # 業務邏輯
-│   ├── types/             # TypeScript 型別
-│   ├── utils/             # 工具函式
-│   ├── hooks/             # React Hooks
-│   ├── store/             # 狀態管理
-│   ├── App.tsx            # 根元件
-│   └── main.tsx           # React 入口
-├── templates/             # 文件範本
-├── public/                # 靜態資源
-└── tests/                 # 測試檔案
-```
+- 活動資料輸入與專案儲存
+- SOP 與風險評估自動生成
+- 結果工作區可直接編輯
+- SOP 支援章節、任務、時程、檢查清單編輯
+- 風險評估支援風險項目、狀態、應對策略、資源與備案編輯
+- 重新生成前會要求確認，避免覆蓋既有結果
+- 3 秒自動儲存與手動儲存
+- Word SOP 匯出
+- Excel 風險評估匯出
+- 範本管理與模板匯入 / 匯出
 
 ## 開發指令
 
 ```bash
-# 安裝依賴
 npm install
-
-# 開發模式
 npm run dev
-
-# 建置應用程式
-npm run build
-
-# 程式碼檢查
-npm run lint
-
-# 格式化程式碼
-npm run format
-
-# 型別檢查
 npm run type-check
+npm run lint
+npm test
+npm run test:ai
+npm run test:ui
+npm run build
 ```
 
-## 核心功能
+## 專案結構
 
-### 1. 活動資訊輸入
-- 支援多種活動類型（會議、展覽、演唱會、體育賽事等）
-- 多步驟表單（基本資訊 → 詳細需求 → 特殊考量）
-- 活動規模與預算評估
+```text
+electron/        Electron 主程序、preload 與 IPC
+src/components/  React UI 元件
+src/services/    商業邏輯與文件/AI/儲存服務
+src/store/       Zustand 狀態管理
+src/types/       共用型別
+src/utils/       共用工具
+tests/           Node test 測試
+templates/       可匯入的活動範本
+public/          靜態資源
+```
 
-### 2. AI 自動生成
-- SOP 流程步驟生成
-- 風險識別與評估
-- 應對策略建議
-- 支援 OpenAI 和 Claude API
+## 驗證狀態
 
-### 3. 文件匯出
-- Word 格式 SOP 文件
-- Excel 格式風險矩陣
-- 自訂範本支援
+已通過：
 
-### 4. 專案管理
-- 歷史專案儲存
-- 範本管理
-- 匯入/匯出功能
+- `npm run type-check`
+- `npm run lint`
+- `npm test`
+- `npm run test:ai`
+- `npm run test:ui`
+- `npm run build`
 
-## 開發計畫
+## 備註
 
-詳細的實作計畫請參考：[實作計畫文件](C:\Users\user\.copilot\session-state\6dcdd704-59ae-4fbf-8b0b-2734dee747e0\plan.md)
-
-## 授權
-
-MIT License
+- 目前 `build` 會產出 Windows 安裝檔與 unpacked 目錄。
+- 若要調整 AI 行為，先檢查 `src/services/ai/` 與 `electron/ipc/generation.ts`。

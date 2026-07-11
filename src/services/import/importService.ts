@@ -29,6 +29,38 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 const isProjectStatus = (value: unknown): value is ProjectStatus =>
   value === 'draft' || value === 'in_progress' || value === 'completed';
 
+const isEventInfo = (value: unknown): value is EventInfo =>
+  isRecord(value) &&
+  typeof value.id === 'string' &&
+  typeof value.name === 'string' &&
+  typeof value.type === 'string' &&
+  typeof value.scale === 'string' &&
+  typeof value.startDate === 'string' &&
+  typeof value.endDate === 'string' &&
+  typeof value.location === 'string' &&
+  typeof value.description === 'string' &&
+  typeof value.attendees === 'number' &&
+  typeof value.createdAt === 'string' &&
+  typeof value.updatedAt === 'string';
+
+const isSOPDocument = (value: unknown): value is SOPDocument =>
+  isRecord(value) &&
+  typeof value.eventId === 'string' &&
+  typeof value.eventName === 'string' &&
+  Array.isArray(value.sections) &&
+  Array.isArray(value.timeline) &&
+  Array.isArray(value.checklist) &&
+  typeof value.generatedAt === 'string';
+
+const isRiskAssessment = (value: unknown): value is RiskAssessment =>
+  isRecord(value) &&
+  typeof value.eventId === 'string' &&
+  typeof value.eventName === 'string' &&
+  Array.isArray(value.risks) &&
+  isRecord(value.riskMatrix) &&
+  isRecord(value.summary) &&
+  typeof value.generatedAt === 'string';
+
 const isCompatibleVersion = (version: string): boolean => version.split('.')[0] === IMPORT_EXPORT_VERSION.split('.')[0];
 
 const getErrorMessage = (error: unknown): string => (error instanceof Error ? error.message : '發生未知錯誤。');
@@ -82,11 +114,11 @@ const deepMerge = <T>(baseValue: T, incomingValue: unknown): T => {
 };
 
 const normalizeProject = (value: unknown): Project => {
-  if (!isRecord(value) || !isRecord(value.eventInfo) || !isProjectStatus(value.status)) {
+  if (!isRecord(value) || !isEventInfo(value.eventInfo) || !isProjectStatus(value.status)) {
     throw new Error('專案資料格式不正確。');
   }
 
-  const eventInfo = value.eventInfo as EventInfo;
+  const eventInfo = value.eventInfo;
   const project: Project = {
     id: String(value.id ?? ''),
     name: String(value.name ?? ''),
@@ -97,8 +129,8 @@ const normalizeProject = (value: unknown): Project => {
       createdAt: String(eventInfo.createdAt ?? value.createdAt ?? new Date().toISOString()),
       updatedAt: String(eventInfo.updatedAt ?? value.updatedAt ?? new Date().toISOString()),
     },
-    sopDocument: isRecord(value.sopDocument) ? (value.sopDocument as SOPDocument) : undefined,
-    riskAssessment: isRecord(value.riskAssessment) ? (value.riskAssessment as RiskAssessment) : undefined,
+    sopDocument: isSOPDocument(value.sopDocument) ? value.sopDocument : undefined,
+    riskAssessment: isRiskAssessment(value.riskAssessment) ? value.riskAssessment : undefined,
     formProgress: isRecord(value.formProgress)
       ? {
           currentStep: Number(value.formProgress.currentStep ?? 0),

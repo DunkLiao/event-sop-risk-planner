@@ -28,9 +28,10 @@ import StepNavigation from './StepNavigation';
 
 interface EventFormProps {
   onOpenTemplatePicker?: () => void;
+  onSubmitted?: () => void;
 }
 
-function EventForm({ onOpenTemplatePicker }: EventFormProps) {
+function EventForm({ onOpenTemplatePicker, onSubmitted }: EventFormProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const isGenerating = useAppStore(state => state.isGenerating);
   const error = useAppStore(state => state.error);
@@ -158,6 +159,7 @@ function EventForm({ onOpenTemplatePicker }: EventFormProps) {
 
       await saveCurrentProject({ status: 'in_progress' });
       setSuccessMessage('活動資訊已儲存，可進入下一階段生成 SOP 與風險規劃。');
+      onSubmitted?.();
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : '表單提交失敗，請稍後再試。');
     } finally {

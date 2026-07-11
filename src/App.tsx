@@ -31,6 +31,7 @@ import SaveProjectAsTemplateDialog from './components/ProjectList/SaveProjectAsT
 import ProjectList from './components/ProjectList/ProjectList';
 import TemplateManager from './components/TemplateManager/TemplateManager';
 import TemplatePickerDialog from './components/TemplateManager/TemplatePickerDialog';
+import ResultWorkspace from './components/ResultWorkspace';
 import { storageService } from './services/storage/storageService';
 import { useAppStore } from './store/appStore';
 import type { Project, ProjectStatus } from './types/settings';
@@ -63,7 +64,7 @@ const theme = createTheme({
   },
 });
 
-type AppView = 'editor' | 'projects' | 'templates';
+type AppView = 'editor' | 'results' | 'projects' | 'templates';
 type SortSelection = 'updatedAt:desc' | 'name:asc' | 'status:asc';
 
 function App() {
@@ -251,6 +252,17 @@ function App() {
                 <ListItemText primary="專案編輯" secondary="回到目前編輯中的內容" />
               </ListItemButton>
               <ListItemButton
+                selected={currentView === 'results'}
+                disabled={!currentProjectId}
+                onClick={() => {
+                  setCurrentView('results');
+                  setDrawerOpen(false);
+                }}
+              >
+                <ListItemIcon><AutoAwesomeRoundedIcon /></ListItemIcon>
+                <ListItemText primary="結果預覽與編輯" secondary="編輯 SOP 與風險評估" />
+              </ListItemButton>
+              <ListItemButton
                 selected={currentView === 'projects'}
                 onClick={() => {
                   setCurrentView('projects');
@@ -304,6 +316,8 @@ function App() {
               <Typography variant="overline" component="span" color="primary.main" sx={{ fontWeight: 700 }}>
                  {currentView === 'projects'
                    ? 'Project History Workspace'
+                   : currentView === 'results'
+                     ? 'Result Editing Workspace'
                    : currentView === 'templates'
                      ? 'Template Library Workspace'
                      : 'Event Planning Workspace'}
@@ -311,6 +325,8 @@ function App() {
               <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 800 }}>
                  {currentView === 'projects'
                    ? '管理你的專案歷史紀錄'
+                   : currentView === 'results'
+                     ? '預覽並完善活動規劃結果'
                    : currentView === 'templates'
                      ? '建立並管理你的活動範本'
                      : '建立你的活動規劃基礎資料'}
@@ -318,6 +334,8 @@ function App() {
               <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 720 }}>
                  {currentView === 'projects'
                    ? '集中檢視專案歷史、搜尋草稿與已完成規劃，並快速載入、複製或匯出專案。'
+                   : currentView === 'results'
+                     ? '生成、編輯並保存 SOP 與風險評估，完成後可匯出為 Word 與 Excel。'
                    : currentView === 'templates'
                      ? '管理內建預設範本與自訂範本，快速從範本建立新專案或分享給團隊。'
                      : '透過一致的欄位收集活動需求，先完成主要輸入表單，再逐步生成活動 SOP、時程與風險評估內容。'}
@@ -335,7 +353,7 @@ function App() {
                 {currentView === 'templates' ? '範本中心' : '專案列表'}
               </Link>
               <Typography color="text.primary">
-                {currentView === 'projects' ? '專案管理' : currentView === 'templates' ? '範本管理' : currentProjectName}
+                {currentView === 'projects' ? '專案管理' : currentView === 'templates' ? '範本管理' : currentView === 'results' ? `${currentProjectName}／結果` : currentProjectName}
               </Typography>
             </Breadcrumbs>
 
@@ -383,8 +401,10 @@ function App() {
               </Box>
             ) : currentView === 'templates' ? (
               <TemplateManager onProjectCreated={handleProjectCreatedFromTemplate} />
+            ) : currentView === 'results' ? (
+              <ResultWorkspace onBackToForm={() => setCurrentView('editor')} />
             ) : (
-              <EventForm onOpenTemplatePicker={() => setTemplatePickerOpen(true)} />
+              <EventForm onOpenTemplatePicker={() => setTemplatePickerOpen(true)} onSubmitted={() => setCurrentView('results')} />
             )}
           </Box>
         </Container>
@@ -410,6 +430,17 @@ function App() {
         loading={dialogLoading}
         onClose={() => setDuplicateDialogProject(null)}
         onConfirm={newName => void handleConfirmDuplicate(newName)}
+      />
+      <SaveProjectAsTemplateDialog
+        open={Boolean(templateDialogProject)}
+        project={templateDialogProject}
+        onClose={() => setTemplateDialogProject(null)}
+        onSaved={() => refreshProjectList()}
+      />
+      <TemplatePickerDialog
+        open={templatePickerOpen}
+        onClose={() => setTemplatePickerOpen(false)}
+        onProjectCreated={handleProjectCreatedFromTemplate}
       />
     </ThemeProvider>
   );

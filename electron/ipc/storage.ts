@@ -121,6 +121,8 @@ const getSettingsForExport = (includeApiKeys: boolean): AppSettings => {
   };
 };
 
+export const getRuntimeSettings = (): AppSettings => getSettingsForExport(true);
+
 export const registerStorageHandlers = (): void => {
   registerHandler('save-project', (_event, project: Project) => {
     getDatabase().saveProject(project);

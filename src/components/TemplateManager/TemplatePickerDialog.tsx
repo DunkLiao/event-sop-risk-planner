@@ -62,7 +62,7 @@ function TemplatePickerDialog({
           sortDirection: 'desc',
         });
         setTemplates(nextTemplates);
-        setSelectedTemplateId(current => {
+        setSelectedTemplateId(() => {
           if (initialTemplateId && nextTemplates.some(template => template.id === initialTemplateId)) {
             return initialTemplateId;
           }
@@ -184,7 +184,7 @@ function TemplatePickerDialog({
                     }}
                   >
                     <Stack spacing={1.25}>
-                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
                         <Typography variant="h6" sx={{ fontWeight: 700 }}>
                           {template.name}
                         </Typography>
@@ -213,7 +213,7 @@ function TemplatePickerDialog({
               }}
             >
               <Stack spacing={1}>
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                   <AutoAwesomeRoundedIcon color="primary" />
                   <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                     範本預覽

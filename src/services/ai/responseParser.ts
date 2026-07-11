@@ -235,7 +235,7 @@ const extractBalancedJsonObject = (response: string): string | null => {
 
 const stripJsonComments = (value: string): string => value.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
-const quoteBareObjectKeys = (value: string): string => value.replace(/([{,]\s*)([A-Za-z_][A-Za-z0-9_\-]*)(\s*:)/g, '$1"$2"$3');
+const quoteBareObjectKeys = (value: string): string => value.replace(/([{,]\s*)([A-Za-z_][A-Za-z0-9_-]*)(\s*:)/g, '$1"$2"$3');
 
 const replaceSmartQuotes = (value: string): string =>
   value

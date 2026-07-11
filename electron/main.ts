@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { registerSettingsHandlers } from './ipc/settings';
+import { registerGenerationHandlers } from './ipc/generation';
 import { closeStorage, registerStorageHandlers } from './ipc/storage';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +40,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   registerStorageHandlers();
   registerSettingsHandlers();
+  registerGenerationHandlers();
   createWindow();
 
   app.on('activate', () => {

@@ -219,7 +219,8 @@ test('supports CRUD operations and JSON serialization', () => {
     database.deleteProject(sampleProject.id);
 
     assert.equal(database.getProject(sampleProject.id), null);
-    assert.deepEqual(database.getTemplates(), []);
+    assert.equal(database.getTemplate(sampleTemplate.id), null);
+    assert.equal(database.getTemplates().every(template => template.id !== sampleTemplate.id), true);
   } finally {
     database.close();
   }

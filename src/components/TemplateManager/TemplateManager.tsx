@@ -343,7 +343,7 @@ function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
                   </TableCell>
                   <TableCell>{formatDateTime(template.createdAt)}</TableCell>
                   <TableCell align="right">
-                    <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                    <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
                       <Tooltip title="使用範本">
                         <IconButton color="primary" onClick={() => handleOpenUseDialog(template)}>
                           <PlayCircleRoundedIcon />
@@ -422,7 +422,7 @@ function TemplateManager({ onProjectCreated }: TemplateManagerProps) {
             <Typography color="text.secondary">
               可將下列分享碼提供給其他人匯入相同範本內容。
             </Typography>
-            <TextField value={shareCode} multiline minRows={5} fullWidth InputProps={{ readOnly: true }} />
+            <TextField value={shareCode} multiline minRows={5} fullWidth slotProps={{ input: { readOnly: true } }} />
           </Stack>
         </DialogContent>
         <DialogActions>

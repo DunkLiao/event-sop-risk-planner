@@ -12,6 +12,9 @@ import type {
   TemplateFilter,
 } from '../../types/settings';
 import type { OpenImportFileResult, SaveExportFileRequest } from '../../types/importExport';
+import type { GenerateRiskRequest, GenerateSOPRequest } from '../../types/ai';
+import type { SOPDocument } from '../../types/event';
+import type { RiskAssessment } from '../../types/risk';
 
 export class StorageService {
   private get electronAPI() {
@@ -86,6 +89,22 @@ export class StorageService {
     return this.electronAPI.removeApiKey(provider);
   }
 
+  async generateSOP(request: GenerateSOPRequest): Promise<SOPDocument> {
+    return this.electronAPI.generateSOP(request);
+  }
+
+  async generateRiskAssessment(request: GenerateRiskRequest): Promise<RiskAssessment> {
+    return this.electronAPI.generateRiskAssessment(request);
+  }
+
+  async exportWordDocument(document: SOPDocument, filePath: string): Promise<void> {
+    await this.electronAPI.exportWordDocument(document, filePath);
+  }
+
+  async exportExcelDocument(assessment: RiskAssessment, filePath: string): Promise<void> {
+    await this.electronAPI.exportExcelDocument(assessment, filePath);
+  }
+
   async exportProject(project: Project, filePath: string): Promise<void> {
     await this.electronAPI.exportProject(project, filePath);
   }
@@ -108,6 +127,40 @@ export class StorageService {
 
   async loadTemplates(filter?: TemplateFilter): Promise<Template[]> {
     return this.electronAPI.loadTemplates(filter);
+  }
+
+  async getDefaultTemplates(): Promise<Template[]> {
+    return this.electronAPI.getDefaultTemplates();
+  }
+
+  async setDefaultTemplate(id: string, isDefault: boolean): Promise<void> {
+    await this.electronAPI.setDefaultTemplate(id, isDefault);
+  }
+
+  async createTemplateFromProject(
+    projectId: string,
+    templateName: string,
+    options?: {
+      includeSop?: boolean;
+      includeRisk?: boolean;
+      includeEventSettings?: boolean;
+      isDefault?: boolean;
+    }
+  ): Promise<Template> {
+    return this.electronAPI.createTemplateFromProject(projectId, templateName, options);
+  }
+
+  async createProjectFromTemplate(templateId: string, projectName: string): Promise<Project> {
+    return this.electronAPI.createProjectFromTemplate(templateId, projectName);
+  }
+
+  async generateTemplateShareCode(templateId: string): Promise<string> {
+    const template = await this.getTemplateById(templateId);
+    if (!template) {
+      throw new Error('找不到要分享的範本。');
+    }
+
+    return btoa(unescape(encodeURIComponent(JSON.stringify(template))));
   }
 
   async getTemplateById(id: string): Promise<Template | null> {

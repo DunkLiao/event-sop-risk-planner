@@ -4,6 +4,7 @@ dist-electron/
 release/
 build/
 .ai-test-dist/
+.storage-test-dist/
 .test-workspace/
 *.tsbuildinfo
 *.log
